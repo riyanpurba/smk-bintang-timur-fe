@@ -1,175 +1,286 @@
-import { useState, useEffect} from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa';
-import LogoFull from '../../assets/Images/logo.png'
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  type Variants,
+} from "framer-motion";
+import { FaArrowRight } from "react-icons/fa";
+
+import LogoFull from "../../assets/Images/logo-white.png";
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 interface MenuProps {
-    name: string;
-    link: string;
+  name: string;
+  link: string;
 }
 
 const menu: MenuProps[] = [
-    {
-        name: "Beranda",
-        link: "/",
-    },
-    {
-        name: "Profil Sekolah",
-        link: "/profil",
-    },
-    {
-        name: "Visi & Misi",
-        link: "/visi-misi",
-    },
-    {
-        name: "Guru & Staff",
-        link: "/guru-staff",
-    },
-    {
-        name: "Jurusan",
-        link: "/jurusan",
-    },
-    {
-        name: "Berita",
-        link: "/berita",
-    },
-    {
-        name: "Galeri",
-        link: "/galeri",
-    },
-    {
-        name: "Kontak",
-        link: "/kontak",
-    },    
-]
+  { name: "Beranda", link: "/" },
+  { name: "Profil Sekolah", link: "/profil" },
+  { name: "Visi & Misi", link: "/visi-misi" },
+  { name: "Guru & Staff", link: "/guru-staff" },
+  { name: "Jurusan", link: "/jurusan" },
+  { name: "Berita", link: "/berita" },
+  { name: "Galeri", link: "/galeri" },
+  { name: "Kontak", link: "/kontak" },
+];
+
+const desktopList: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.3 } },
+};
+const desktopItem: Variants = {
+  hidden: { opacity: 0, y: -14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+};
+
+const mobileContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.3 } },
+};
+const mobileItem: Variants = {
+  hidden: { opacity: 0, y: 32 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
+/** Tiga garis yang berubah menjadi X */
+const Burger = ({ open }: { open: boolean }) => (
+  <span className="relative block h-5 w-7" aria-hidden="true">
+    <motion.span
+      className="absolute left-0 top-0 h-[2px] w-full rounded bg-white"
+      animate={open ? { y: 9, rotate: 45, backgroundColor: "#FFD600" } : { y: 0, rotate: 0, backgroundColor: "#FFFFFF" }}
+    />
+    <motion.span
+      className="absolute left-0 top-[9px] h-[2px] w-full rounded bg-white"
+      animate={open ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+    />
+    <motion.span
+      className="absolute left-0 top-[18px] h-[2px] w-full rounded bg-white"
+      animate={open ? { y: -9, rotate: -45, backgroundColor: "#FFD600" } : { y: 0, rotate: 0, backgroundColor: "#FFFFFF" }}
+    />
+  </span>
+);
 
 const Header = () => {
-    const location = useLocation();
-    const [ isSticky, setIsSticky ] = useState(false);
-    const [openMenu, setOpenMenu] = useState(false);
+  const location = useLocation();
+  const reduce = useReducedMotion();
 
-    // Handle scroll
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsSticky(window.scrollY > 20);
-        };
+  const [isSticky, setIsSticky] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
 
-        handleScroll();
+  // Scroll: ubah gaya header (header tetap terlihat saat di-scroll)
+  const { scrollY, scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 24 });
 
-        window.addEventListener("scroll", handleScroll, {
-            passive: true,
-        });
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsSticky(latest > 20);
+  });
 
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, []);
+  // Tutup menu saat pindah halaman
+  useEffect(() => {
+    setOpenMenu(false);
+  }, [location.pathname]);
 
-    // Close mobile menu when route changes
-    useEffect(() => {
-        setOpenMenu(false);
-    }, [location.pathname]);
+  // Kunci scroll body + tombol Escape saat menu mobile terbuka
+  useEffect(() => {
+    document.body.style.overflow = openMenu ? "hidden" : "";
 
-    // Prevent body scroll when mobile menu is open
-    useEffect(() => {
-        document.body.style.overflow = openMenu ? "hidden" : "";
-
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, [openMenu]);
-
-    // Check active menu
-    const isActive = (link: string) => {
-        if (link === "/") {
-            return location.pathname === "/";
-        }
-
-        return (
-            location.pathname === link ||
-            location.pathname.startsWith(`${link}/`)
-        );
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenMenu(false);
     };
+    if (openMenu) window.addEventListener("keydown", onKey);
 
-    // Toggle mobile menu
-    const handleOpenMenu = () => {
-        setOpenMenu((prev) => !prev);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
     };
+  }, [openMenu]);
 
-    // Close mobile menu
-    const handleCloseMenu = () => {
-        setOpenMenu(false);
-    };
-    return (
-        <header className={`${isSticky ? 'fixed bg-primary shadow-lg' : 'relative md:fixed bg-transparent'} w-full h-auto p-0 top-0 transition-all duration-300 ease-in-out z-[9999]`}>
-            <nav className='relative w-full px-5 py-4 flex items-center justify-between'>
-                <a href='/' className='flex items-center text-yellow text-4xl font-montserrat font-bold uppercase'>
-                    <img src={LogoFull} className={`${isSticky ? 'w-14 h-14 md:w-10  md:h-10' : 'w-56 h-auto md:w-60 md:h-20'} transition-all`} width={250} height={80} alt="Logo" title="Catha" />
-                </a>
-                <button onClick={handleOpenMenu} className='block lg:hidden outline-none transition-all'>
-                    {
-                        openMenu ? <FaTimes className='text-yellow text-2xl' /> : <FaBars className='text-yellow text-2xl' />
-                    }
-                </button>
-                <div className='hidden lg:flex items-center justify-between '>
-                    <ul className='flex items-center gap-x-10'>
-                        {menu.map((item, index) => {
-                            const isActive = location.pathname === item.link;
-                            return (
-                                <li key={index} className="mx-auto">
-                                    {/* <a href={item.link} className={`block py-2 pl-3 pr-4 ${isActive ? 'text-secondary font-semibold' : 'text-white font-normal'} font-inter hover:text-yellow capitalize rounded md:p-0`}>{item.name}</a> */}
-                                    <Link
-                                        to={item.link}
-                                        className={`
-                                        relative block py-2 text-sm
-                                        transition-colors duration-200
-                                        after:absolute after:bottom-0 after:left-0
-                                        after:h-[2px] after:bg-secondary
-                                        after:transition-all after:duration-300
-                                        ${
-                                            isActive
-                                            ? "text-secondary font-bold after:w-full"
-                                            : "text-white font-semibold after:w-0 hover:text-secondary hover:after:w-full"
-                                        }
-                                        `}
-                                    >
-                                        {item.name}
-                                    </Link>
-                                </li>
-                            )
-                        })}
-                    </ul>
-                </div>
-                <div className={`fixed block lg:hidden top-0 left-0 right-0 w-full h-screen py-4 bg-black transition-all overflow-hidden ${openMenu ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-                    <div className="container">
-                        <div className='flex flex-col gap-y-20'>
-                            <div className='flex items-center justify-between'>
-                                <a href='/' className='flex items-center text-yellow text-4xl font-montserrat font-bold uppercase'>
-                                    <img src={LogoFull} className='w-56 h-auto md:w-60 md:h-20' width={250} height={80} alt="Logo" title="Catha" />
-                                </a>
-                                <button onClick={handleOpenMenu} className='block md:hidden outline-none transition-all'>
-                                    {
-                                        openMenu ? <FaTimes className='text-yellow text-2xl' /> : <FaBars className='text-yellow text-2xl' />
-                                    }
-                                </button>
-                            </div>
-                            <ul className='flex flex-col items-start justify-start text-left gap-y-4'>
-                                {menu.map((item, index) => {
-                                    const isActive = location.pathname === item.link;
-                                    return (
-                                        <li key={index} className="">
-                                            <Link to={item.link} className={`block py-2 pl-3 pr-4 ${isActive ? 'text-secondary font-semibold' : 'text-white font-normal'} font-inter hover:text-yellow capitalize rounded md:p-0`}>{item.name}</Link>
-                                        </li>
-                                    )
-                                })}
-                            </ul>
-                            {/* <SosialMedia className="flex items-center justify-between" /> */}
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </header>
-    );
-}
+  const isActive = (link: string) => {
+    if (link === "/") return location.pathname === "/";
+    return location.pathname === link || location.pathname.startsWith(`${link}/`);
+  };
+
+  const headerBg = openMenu
+    ? "bg-transparent"
+    : isSticky
+    ? "bg-[#0A0A0A]/85 shadow-lg shadow-black/30 backdrop-blur-md"
+    : "bg-[#0A0A0A] md:bg-transparent";
+
+  return (
+    <>
+      <motion.header
+        initial={reduce ? false : { y: "-100%" }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.4, ease: EASE }}
+        className={`fixed left-0 top-0 z-[9999] w-full transition-colors duration-300 ${headerBg}`}
+      >
+        <nav
+          className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-5 py-4 lg:px-8"
+          aria-label="Navigasi utama"
+        >
+          {/* Logo */}
+          <Link to="/" className="shrink-0" onClick={() => setOpenMenu(false)}>
+            <motion.img
+              src={LogoFull}
+              alt="SMK RK Bintang Timur Pematangsiantar"
+              width={250}
+              height={80}
+              className="h-auto w-44 sm:w-52 lg:w-44 xl:w-56"
+              whileHover={reduce ? undefined : { scale: 1.04 }}
+              transition={{ type: "spring", stiffness: 300, damping: 18 }}
+            />
+          </Link>
+
+          {/* Desktop menu */}
+          <div className="hidden items-center gap-6 lg:flex xl:gap-8">
+            <motion.ul
+              className="flex items-center gap-x-5 xl:gap-x-8"
+              variants={desktopList}
+              initial={reduce ? "show" : "hidden"}
+              animate="show"
+            >
+              {menu.map((item) => {
+                const active = isActive(item.link);
+                return (
+                  <motion.li key={item.link} variants={desktopItem}>
+                    <Link
+                      to={item.link}
+                      aria-current={active ? "page" : undefined}
+                      className={`group relative block rounded-sm py-2 text-sm transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFD600] ${
+                        active
+                          ? "font-bold text-[#FFD600]"
+                          : "font-semibold text-white hover:text-[#FFD600]"
+                      }`}
+                    >
+                      {item.name}
+
+                      {/* Garis aktif berpindah mengikuti menu (shared layout) */}
+                      {active && (
+                        <motion.span
+                          layoutId="nav-underline"
+                          className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-[#FFD600]"
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      {!active && (
+                        <span className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 rounded-full bg-[#E11D2E] transition-transform duration-300 group-hover:scale-x-100" />
+                      )}
+                    </Link>
+                  </motion.li>
+                );
+              })}
+            </motion.ul>
+
+            <motion.div
+              initial={reduce ? false : { opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, type: "spring", stiffness: 260, damping: 16 }}
+            >
+              <Link
+                to="/ppdb"
+                className="inline-flex items-center rounded-lg bg-[#FFD600] px-5 py-2.5 text-sm font-extrabold text-[#0A0A0A] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E11D2E] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              >
+                PPDB
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            type="button"
+            onClick={() => setOpenMenu((prev) => !prev)}
+            aria-label={openMenu ? "Tutup menu" : "Buka menu"}
+            aria-expanded={openMenu}
+            aria-controls="mobile-menu"
+            className="-mr-2 flex h-11 w-11 items-center justify-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[#FFD600] lg:hidden"
+          >
+            <Burger open={openMenu} />
+          </button>
+        </nav>
+
+        {/* Scroll progress */}
+        <motion.div
+          className="absolute bottom-0 left-0 h-[3px] w-full origin-left bg-gradient-to-r from-[#E11D2E] to-[#FFD600]"
+          style={{ scaleX: progress }}
+          animate={{ opacity: isSticky ? 1 : 0 }}
+          aria-hidden="true"
+        />
+      </motion.header>
+
+      {/* Mobile overlay (di luar header agar tidak terkena transform) */}
+      <AnimatePresence>
+        {openMenu && (
+          <motion.div
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu navigasi"
+            className="fixed inset-0 z-[9998] flex h-[100dvh] flex-col overflow-y-auto bg-[#0A0A0A] px-6 pb-10 pt-28 lg:hidden"
+            initial={{ clipPath: "circle(0% at 92% 5%)" }}
+            animate={{ clipPath: "circle(150% at 92% 5%)" }}
+            exit={{ clipPath: "circle(0% at 92% 5%)" }}
+            transition={{ duration: reduce ? 0 : 0.7, ease: EASE }}
+          >
+            <div className="pointer-events-none absolute -right-20 top-10 h-72 w-72 rounded-full bg-[#E11D2E]/25 blur-[100px]" />
+            <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-[#FFD600]/15 blur-[100px]" />
+
+            <motion.div
+              className="relative flex flex-1 flex-col justify-between gap-10"
+              variants={mobileContainer}
+              initial="hidden"
+              animate="show"
+            >
+              <ul className="flex flex-col gap-1">
+                {menu.map((item) => {
+                  const active = isActive(item.link);
+                  return (
+                    <motion.li key={item.link} variants={mobileItem}>
+                      <Link
+                        to={item.link}
+                        onClick={() => setOpenMenu(false)}
+                        aria-current={active ? "page" : undefined}
+                        className={`group flex items-center gap-3 rounded-lg py-2.5 text-2xl font-extrabold transition-all duration-300 hover:translate-x-2 sm:text-3xl ${
+                          active ? "text-[#FFD600]" : "text-white hover:text-[#FFD600]"
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full bg-[#E11D2E] transition-transform duration-300 ${
+                            active ? "scale-100" : "scale-0 group-hover:scale-100"
+                          }`}
+                        />
+                        {item.name}
+                      </Link>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+
+              <motion.div variants={mobileItem} className="border-t border-white/10 pt-6">
+                <p className="mb-4 text-sm text-white/60">
+                  Pendaftaran siswa baru SMK RK Bintang Timur
+                </p>
+                <Link
+                  to="/ppdb"
+                  onClick={() => setOpenMenu(false)}
+                  className="group inline-flex w-full items-center justify-center gap-3 rounded-xl bg-[#E11D2E] px-6 py-4 text-sm font-extrabold text-white shadow-xl shadow-[#E11D2E]/30 transition-all duration-300 hover:bg-[#FFD600] hover:text-[#0A0A0A] sm:w-auto"
+                >
+                  Informasi PPDB
+                  <FaArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
 export default Header;
