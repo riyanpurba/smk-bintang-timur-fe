@@ -16,14 +16,11 @@ import Logo from "../../assets/Images/logo-white.png";
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const quickLinks = [
-  { name: "Beranda", link: "/" },
-  { name: "Profil Sekolah", link: "/profil" },
+  { name: "Identitas Sekolah", link: "/identitas-sekolah" },
+  { name: "Sertifikat Akreditas", link: "/sertifikat-akreditas" },
   { name: "Visi & Misi", link: "/visi-misi" },
-  { name: "Guru & Staff", link: "/guru-staff" },
-  { name: "Jurusan", link: "/jurusan" },
-  { name: "Berita", link: "/berita" },
-  { name: "Galeri", link: "/galeri" },
-  { name: "PPDB", link: "/ppdb" },
+  { name: "Sejarah Singkat", link: "/sejarah-singkat" },
+  { name: "Struktur Organisasi", link: "/struktur-organisasi" },
 ];
 
 const socials = [
@@ -142,7 +139,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <motion.div variants={column}>
-            <Heading>Tautan Cepat</Heading>
+            <Heading>Profile Sekolah</Heading>
 
             <ul className="grid grid-cols-2 gap-x-4 gap-y-4">
               {quickLinks.map((item) => (
@@ -167,7 +164,7 @@ const Footer = () => {
               <motion.li variants={child} className="flex items-start gap-3">
                 <FaMapMarkerAlt className="mt-1 shrink-0 text-[#FFD600]" />
                 <p className="text-sm leading-6 text-white/65">
-                  Pematangsiantar, Sumatera Utara, Indonesia
+                Jalan Melanthon Siregar Gang Sipahutar Pematangsiantar<br />SIANTAR MARIHAT, Kec. Siantar Marihat<br />Kota Pematangsiantar, Prov. Sumatera Utara
                 </p>
               </motion.li>
 
@@ -177,7 +174,7 @@ const Footer = () => {
                   href="tel:+620000000000"
                   className="text-sm text-white/65 transition-colors duration-300 hover:text-[#FFD600]"
                 >
-                  Nomor Telepon Sekolah
+                  06227436276
                 </a>
               </motion.li>
 
@@ -187,7 +184,7 @@ const Footer = () => {
                   href="mailto:email@sekolah.sch.id"
                   className="break-all text-sm text-white/65 transition-colors duration-300 hover:text-[#FFD600]"
                 >
-                  Email Sekolah
+                  smkbt_siantar@yahoo.co.id
                 </a>
               </motion.li>
             </ul>
