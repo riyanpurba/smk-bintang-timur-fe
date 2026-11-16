@@ -18,19 +18,21 @@ interface GetPostsResult {
   pagination: PostsPagination;
 }
 
-export const getPosts = async ({
-  page = 1,
-  limit = 10,
-  search,
-  category,
-}: GetPostsParams = {}): Promise<GetPostsResult> => {
+export const getPosts = async (
+  params: GetPostsParams = {},
+  signal?: AbortSignal,
+): Promise<GetPostsResult> => {
+  const page = params.page ?? 1;
+  const limit = params.limit ?? 10;
+
   const response = await api.get<PostsResponse>("/posts", {
     params: {
       page,
       limit,
-      ...(search ? { search } : {}),
-      ...(category ? { category } : {}),
+      search: params.search,
+      category: params.category,
     },
+    signal,
   });
 
   const result = response.data;

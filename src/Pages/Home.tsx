@@ -9,7 +9,7 @@ import FeaturedPrograms from '../Components/Section/FeaturedPrograms';
 import AchievementCenter from '../Components/Section/AchievementCenter';
 import NewsSection from '../Components/Section/NewsSection';
 import GallerySection from '../Components/Section/GallerySection';
-import TestimonialSection from '../Components/Section/TestimonialSection';
+// import TestimonialSection from '../Components/Section/TestimonialSection';
 
 const Home = () => {
     return (
@@ -32,7 +32,7 @@ const Home = () => {
             <AchievementCenter />
             <NewsSection />
             <GallerySection />
-            <TestimonialSection />
+            {/* <TestimonialSection /> */}
         </>
     );
 }

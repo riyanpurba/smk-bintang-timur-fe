@@ -1,3 +1,4 @@
+
 import api from "./api";
 import type {
   MediaItem,
@@ -15,15 +16,19 @@ interface GetMediaResult {
   pagination: MediaPagination;
 }
 
-export const getMedia = async ({
-  page = 1,
-  limit = 10,
-}: GetMediaParams = {}): Promise<GetMediaResult> => {
+export const getMedia = async (
+  params: GetMediaParams = {},
+  signal?: AbortSignal,
+): Promise<GetMediaResult> => {
+  const page = params.page ?? 1;
+  const limit = params.limit ?? 10;
+
   const response = await api.get<MediaResponse>("/galleries", {
     params: {
       page,
       limit,
     },
+    signal,
   });
 
   const result = response.data;
@@ -34,7 +39,7 @@ export const getMedia = async ({
 
   const payload = result.data;
 
-  const media = Array.isArray(payload)
+  const media: MediaItem[] = Array.isArray(payload)
     ? payload
     : payload?.data ?? [];
 
