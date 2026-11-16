@@ -6,16 +6,17 @@ import SchoolSchema from './Components/Common/SchoolSchema';
 
 import Home from './Pages/Home'
 // import Profil from "./pages/Profil/Profil";
-import IdentitasSekolah from "./pages/Profil/IdentitasSekolah";
-import SertifikatAkreditasi from "./pages/Profil/SertifikatAkreditasi";
+import IdentitasSekolah from "./Pages/Profil/IdentitasSekolah";
+import SertifikatAkreditasi from "./Pages/Profil/SertifikatAkreditasi";
 import VisiMisi from './Pages/Profil/VisiMisi'
-import SejarahSingkat from "./pages/Profil/SejarahSingkat";
-import StrukturOrganisasi from "./pages/Profil/StrukturOrganisasi";
+import SejarahSingkat from "./Pages/Profil/SejarahSingkat";
+import StrukturOrganisasi from "./Pages/Profil/StrukturOrganisasi";
 import Teachers from './Pages/Teachers';
 import Majors from './Pages/Major';
 import Berita from './Pages/Berita';
 import Galeri from './Pages/Galeri'
 import Kontak from './Pages/Kontak';
+import PPDB from './Pages/PPDB';
 // import ComingSoon from './Pages/ComingSoon';
 
 import ErrorPage from './Pages/ErrorPage';
@@ -39,6 +40,7 @@ const App = () => {
           <Route path='/berita' element={<Berita />} />
           <Route path='/galeri' element={<Galeri />} />
           <Route path='/kontak' element={<Kontak />} />
+          <Route path='/ppdb' element={<PPDB />} />
 
           {/* Error routes */}
           <Route path="/403" element={<ErrorPage type="403" />} />

@@ -27,7 +27,8 @@ const getMediaUrl = (item: MediaItem): string => {
     item.image_url ||
     item.url ||
     item.thumbnail_url ||
-    item.path;
+    item.path ||
+    item.cover_url;
 
   if (!url) return "";
 

@@ -8,6 +8,7 @@ export interface MediaItem {
     url?: string | null;
     image_url?: string | null;
     thumbnail_url?: string | null;
+    cover_url?: string | null;
     path?: string | null;
     type?: string | null;
     mime_type?: string | null;
