@@ -17,6 +17,7 @@ import Berita from './Pages/Berita';
 import Galeri from './Pages/Galeri'
 import Kontak from './Pages/Kontak';
 import PPDB from './Pages/PPDB';
+import Prestasi from './Pages/Prestasi';
 // import ComingSoon from './Pages/ComingSoon';
 
 import ErrorPage from './Pages/ErrorPage';
@@ -38,6 +39,7 @@ const App = () => {
           <Route path='/teachers' element={<Teachers />} />
           <Route path='/jurusan' element={<Majors />} />
           <Route path='/berita' element={<Berita />} />
+          <Route path='/prestasi' element={<Prestasi />} />
           <Route path='/galeri' element={<Galeri />} />
           <Route path='/kontak' element={<Kontak />} />
           <Route path='/ppdb' element={<PPDB />} />
