@@ -1,145 +1,73 @@
-import type { PointerEvent, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { FaLaptopCode, FaBriefcase, FaUserGraduate, FaAward } from "react-icons/fa";
-
+import { FaGraduationCap, FaRedo } from "react-icons/fa";
 import SectionHeading from "../Common/SectionHeading";
+import api from "../../services/api";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-interface ProgramItem {
-  title: string;
-  description: string;
-  icon: ReactNode;
-  number: string;
+interface FeaturedMajor {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  is_featured: boolean;
 }
-
-const programs: ProgramItem[] = [
-  {
-    number: "01",
-    title: "Pembelajaran Berbasis Praktik",
-    description:
-      "Mengembangkan keterampilan siswa melalui pembelajaran teori dan praktik yang seimbang.",
-    icon: <FaLaptopCode />,
-  },
-  {
-    number: "02",
-    title: "Pengembangan Kewirausahaan",
-    description:
-      "Mendorong kreativitas, kemandirian, dan jiwa wirausaha untuk menghadapi dunia kerja.",
-    icon: <FaBriefcase />,
-  },
-  {
-    number: "03",
-    title: "Pengembangan Karakter",
-    description:
-      "Membentuk siswa yang disiplin, bertanggung jawab, berintegritas, dan berkarakter.",
-    icon: <FaUserGraduate />,
-  },
-  {
-    number: "04",
-    title: "Pengembangan Prestasi",
-    description:
-      "Mendukung potensi dan bakat siswa melalui kegiatan akademik maupun nonakademik.",
-    icon: <FaAward />,
-  },
-];
-
-const grid: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
-};
-const card: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
-};
-const bar: Variants = {
-  hidden: { scaleX: 0 },
-  show: { scaleX: 1, transition: { duration: 0.7, ease: EASE, delay: 0.4 } },
-};
-const icon: Variants = {
-  hidden: { scale: 0, rotate: -45 },
-  show: { scale: 1, rotate: 0, transition: { type: "spring", stiffness: 260, damping: 14, delay: 0.2 } },
-};
+interface ApiResponse { success: boolean; data: FeaturedMajor[] }
+const grid: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
+const card: Variants = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } } };
 
 const FeaturedPrograms = () => {
   const reduce = useReducedMotion();
+  const [programs, setPrograms] = useState<FeaturedMajor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  // Spotlight merah mengikuti kursor di dalam kartu
-  const handleMove = (e: PointerEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty("--x", `${e.clientX - r.left}px`);
-    el.style.setProperty("--y", `${e.clientY - r.top}px`);
+  const loadPrograms = () => {
+    setLoading(true);
+    setError(false);
+    api.get<ApiResponse>("/majors", { params: { is_featured: true, limit: 4, sort: "name", order: "asc" } })
+      .then(({ data }) => setPrograms(Array.isArray(data.data) ? data.data.slice(0, 4) : []))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   };
+
+  useEffect(() => { loadPrograms(); }, []);
 
   return (
     <section className="bg-[#F5F5F5] py-20 md:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <SectionHeading
-          label="Program Unggulan"
-          title="Mempersiapkan Generasi"
-          accent="Masa Depan"
-          description="Berbagai program pengembangan untuk membekali siswa dengan pengetahuan, keterampilan, dan karakter yang unggul."
-          link={{ to: "/profil", text: "Selengkapnya" }}
-        />
-
-        <motion.div
-          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          variants={grid}
-          initial={reduce ? "show" : "hidden"}
-          whileInView="show"
-          viewport={{ once: true, amount: 0.15 }}
-        >
-          {programs.map((program) => (
-            <motion.div
-              key={program.number}
-              variants={card}
-              whileHover={reduce ? undefined : { y: -8 }}
-              onPointerMove={handleMove}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-7 shadow-sm transition-shadow duration-300 hover:shadow-xl"
-            >
-              {/* Cursor spotlight */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                style={{
-                  background:
-                    "radial-gradient(220px circle at var(--x, 50%) var(--y, 50%), rgba(225,29,46,0.10), transparent 70%)",
-                }}
-                aria-hidden="true"
-              />
-
-              {/* Top line sweep */}
-              <span className="absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-[#E11D2E] transition-transform duration-500 group-hover:scale-x-100" />
-
-              <div className="absolute right-5 top-5 text-4xl font-extrabold text-gray-200 transition-colors duration-300 group-hover:text-[#FFD600]">
-                {program.number}
-              </div>
-
-              <motion.div
-                variants={icon}
-                className="relative mb-7 flex h-14 w-14 items-center justify-center rounded-xl bg-[#0A0A0A]/5 text-2xl text-[#E11D2E] transition-colors duration-300 group-hover:bg-[#E11D2E] group-hover:text-white"
-              >
-                {program.icon}
-              </motion.div>
-
-              <h3 className="relative mb-3 text-lg font-bold text-[#0A0A0A]">
-                {program.title}
-              </h3>
-
-              <p className="relative text-sm leading-7 text-gray-600">
-                {program.description}
-              </p>
-
-              <motion.div
-                variants={bar}
-                className="relative mt-6 h-1 w-10 origin-left rounded-full bg-[#FFD600] transition-[width] duration-300 group-hover:w-20"
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        <SectionHeading label="Program Unggulan" title="Mempersiapkan Generasi" accent="Masa Depan" description="Program keahlian pilihan yang dikembangkan untuk membekali siswa dengan pengetahuan, keterampilan, dan karakter unggul." link={{ to: "/jurusan", text: "Lihat Semua Program" }} />
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-label="Memuat program unggulan">
+            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-white" />)}
+          </div>
+        ) : error ? (
+          <div role="alert" className="rounded-2xl bg-white p-8 text-center text-sm text-gray-600">
+            <p>Program unggulan belum dapat dimuat.</p>
+            <button type="button" onClick={loadPrograms} className="mt-3 inline-flex items-center gap-2 font-semibold text-[#E11D2E]"><FaRedo /> Coba lagi</button>
+          </div>
+        ) : programs.length === 0 ? (
+          <div className="rounded-2xl bg-white p-8 text-center text-sm text-gray-600">Belum ada program yang ditandai sebagai Program Unggulan. Silakan atur melalui CMS.</div>
+        ) : (
+          <motion.div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" variants={grid} initial={reduce ? "show" : "hidden"} whileInView="show" viewport={{ once: true, amount: 0.15 }}>
+            {programs.map((program, index) => (
+              <motion.article key={program.id} variants={card} whileHover={reduce ? undefined : { y: -8 }} className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-xl">
+                <div className="relative flex h-40 items-center justify-center overflow-hidden bg-[#0A0A0A]/5">
+                  {program.thumbnail_url ? <img src={program.thumbnail_url} alt={program.name} loading="lazy" className="h-full w-full object-cover" /> : <FaGraduationCap className="text-5xl text-[#E11D2E]" />}
+                  <span className="absolute right-4 top-4 rounded-full bg-[#FFD600] px-3 py-1 text-xs font-bold text-[#0A0A0A]">{program.code}</span>
+                </div>
+                <div className="p-6">
+                  <h3 className="mb-3 text-lg font-bold text-[#0A0A0A]">{program.name}</h3>
+                  <p className="text-sm leading-7 text-gray-600">{program.description || "Program keahlian untuk mengembangkan kompetensi dan keterampilan siswa."}</p>
+                  <div className="mt-6 h-1 w-10 rounded-full bg-[#FFD600] transition-[width] duration-300 group-hover:w-20" />
+                </div>
+              </motion.article>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );
 };
-
 export default FeaturedPrograms;
