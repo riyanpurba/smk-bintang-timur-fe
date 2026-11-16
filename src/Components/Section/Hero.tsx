@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PointerEvent, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -20,6 +20,9 @@ import {
 } from "react-icons/fa";
 
 import Banner from "../../assets/Images/banner.jpg";
+import api from "../../services/api";
+
+interface HomeContent { hero_title?: string; hero_subtitle?: string | null; hero_image_url?: string | null; }
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -207,6 +210,12 @@ const StatChip = ({
 };
 
 const Hero = () => {
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
+  useEffect(() => {
+    api.get<{ data: HomeContent }>('/school/home')
+      .then((response) => setHomeContent(response.data.data))
+      .catch(() => setHomeContent(null));
+  }, []);
   const sectionRef = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
 
@@ -254,7 +263,7 @@ const Hero = () => {
       <div
         className="hero-bg absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url(${Banner})`,
+          backgroundImage: `url(${homeContent?.hero_image_url || Banner})`,
         }}
         aria-hidden="true"
       />
@@ -335,13 +344,13 @@ const Hero = () => {
                 variants={reveal}
                 className="hero-shine block"
               >
-                Gemilang,
+                {(homeContent?.hero_title || 'Gemilang, Dimulai dari Sini.').split(',')[0]},
               </motion.span>
             </span>
 
             <span className="block overflow-hidden pb-2">
               <motion.span variants={reveal} className="block">
-                Dimulai dari Sini.
+                {(homeContent?.hero_title || 'Gemilang, Dimulai dari Sini.').split(',').slice(1).join(',').trim() || 'Dimulai dari Sini.'}
               </motion.span>
             </span>
           </h1>
@@ -357,8 +366,7 @@ const Hero = () => {
             variants={rise}
             className="mt-6 max-w-2xl text-base leading-8 text-white/75 sm:text-lg md:text-xl"
           >
-            Mengembangkan potensi, membangun keterampilan, dan membentuk
-            karakter generasi unggul untuk menghadapi tantangan masa depan.
+            {homeContent?.hero_subtitle || 'Mengembangkan potensi, membangun keterampilan, dan membentuk karakter generasi unggul untuk menghadapi tantangan masa depan.'}
           </motion.p>
 
           <motion.div

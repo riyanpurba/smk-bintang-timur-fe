@@ -19,7 +19,7 @@ export const getMedia = async ({
   page = 1,
   limit = 10,
 }: GetMediaParams = {}): Promise<GetMediaResult> => {
-  const response = await api.get<MediaResponse>("/media", {
+  const response = await api.get<MediaResponse>("/galleries", {
     params: {
       page,
       limit,
